@@ -1,0 +1,11 @@
+{
+  "name": "ticketing-engine",
+  "version-string": "3.0.0",
+  "dependencies": [
+    "crow",
+    {
+      "name": "mysql-connector-cpp",
+      "features": ["jdbc"]
+    }
+  ]
+}
