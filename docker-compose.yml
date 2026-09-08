@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ticketing_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ticketing
+      MYSQL_USER: ticketing
+      MYSQL_PASSWORD: ticketing
+    command: >
+      --innodb_lock_wait_timeout=10
+      --wait_timeout=600
+      --interactive_timeout=600
+    # innodb_lock_wait_timeout=10  → if Bob waits > 10s for a locked row,
+    #                                MySQL cancels his query with ERROR 1205.
+    #                                Default is 50s — too long for a booking API.
+    #
+    # wait_timeout=600             → if a connection is idle for 10 minutes,
+    #                                MySQL closes it server-side. This rolls back
+    #                                any open transaction on that connection.
+    #                                Default is 28800s (8 hours) — far too long.
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysqldata:
